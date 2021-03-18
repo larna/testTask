@@ -46,14 +46,14 @@ mvn package
 ```sh
 java -jar target/test-1.0-SNAPSHOT-jar-with-dependencies.jar --fake-data
 ```
-
 Фейковые данные сохраняются в файлы с названиями: fakeData-N%d.txt
+
 Выходные данные сохраняются в файлы с названиями: out-N%d.txt
+
 ---
 Запуск приложения, где данные поступают через stdin
 ```sh
 java -jar target/test-1.0-SNAPSHOT-jar-with-dependencies.jar < yourData.txt
 ```
-
 Выходные данные сохраняются в файлы с названиями: out.txt
 
