@@ -10,10 +10,10 @@ public class Main {
 
     public static void main(String[] args) {
         if (isFakeDataArg(args)) {
-            new FakeDataCommand().execute();
+            FakeDataCommand.getInstance().execute();
             return;
         }
-        new MigrationCommand().execute();
+        MigrationCommand.getInstance().execute();
     }
 
     private static Boolean isFakeDataArg(String... args) {

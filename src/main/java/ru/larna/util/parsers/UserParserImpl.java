@@ -5,7 +5,8 @@ import ru.larna.model.User;
 import ru.larna.util.validators.EmailValidator;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -54,9 +55,10 @@ public class UserParserImpl implements UserParser {
 
         final String userName = matcher.group(1);
         final String emailsString = matcher.group(2);
-        User user = new User(userName);
-        user.setEmails(parseEmails(emailsString, user));
-        return user;
+        return User.builder()
+                .name(userName)
+                .emails(parseEmails(emailsString))
+                .build();
     }
 
     /**
@@ -65,14 +67,14 @@ public class UserParserImpl implements UserParser {
      * @param emails - строка содержащая email
      * @return список объектов Email
      */
-    private List<Email> parseEmails(String emails, User user) {
+    private Set<Email> parseEmails(String emails) {
         String[] emailArray = emails.split("\\s*,\\s*");
         if (!isAllEmailsValid(emailArray))
             throw new UserWrongFormatException("Wrong emails - " + emails);
 
         return Arrays.stream(emailArray)
-                .map(email -> new Email(email, user))
-                .collect(Collectors.toList());
+                .map(Email::new)
+                .collect(Collectors.toCollection(HashSet::new));
     }
 
     /**
@@ -83,6 +85,6 @@ public class UserParserImpl implements UserParser {
      */
     private Boolean isAllEmailsValid(String[] emailsString) {
         return Arrays.stream(emailsString)
-                .allMatch(email -> emailValidator.validate(email));
+                .allMatch(emailValidator::validate);
     }
 }

@@ -1,15 +1,14 @@
 package ru.larna.model;
 
-import lombok.*;
+import lombok.Value;
 
 /**
  * Класс описывающий email.
  */
-@Data
-@Builder
-@AllArgsConstructor
-@RequiredArgsConstructor
+@Value
 public class Email {
+    /**
+     * Строка email адреса
+     */
     private final String email;
-    private User user;
 }

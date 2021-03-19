@@ -5,15 +5,18 @@ import java.io.IOException;
 /**
  * Сервис ввода/вывода данных
  */
-public interface IOService extends AutoCloseable{
+public interface IOService extends AutoCloseable {
     /**
      * Метод чтения данных
-     * @return
-     * @throws IOException
+     *
+     * @return возвращает прочитанную строку
+     * @throws IOException выбрасывает исключение в случае ошибок ввода/вывода
      */
     String read() throws IOException;
+
     /**
      * Метод вывода данных
+     *
      * @param message строка для вывода
      */
     void write(String message);

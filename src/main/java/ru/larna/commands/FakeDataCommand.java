@@ -25,6 +25,9 @@ public class FakeDataCommand {
     private final static String FILENAME_TEMPLATE = "fakeData-N%d.txt";
     private final static String FILE_OUTPUT_TEMPLATE = "out-N%d.txt";
 
+    public static FakeDataCommand getInstance(){
+        return new FakeDataCommand();
+    }
     /**
      * Метод производит генерацию фейковых данных для 10,100,1000,10000...пользователей и проверяет алгоритм слияния на них
      * При генерации данные сбрасываются в соответствующий файл fakeData-N%d.txt
@@ -41,6 +44,7 @@ public class FakeDataCommand {
 
     /**
      * Запуск генерации фейковых данных.
+     *
      * @param usersCount ожидаемое кол-во пользователей
      */
     private void generate(Integer usersCount) {
@@ -58,7 +62,7 @@ public class FakeDataCommand {
      * Проверка на массивах fake данных
      *
      * @param userCount - кол-во пользователей
-     * @param parser - парсер строки в объект пользователя
+     * @param parser    - парсер строки в объект пользователя
      */
     private void checkOnFakeData(Integer userCount, UserParser parser) {
         try {

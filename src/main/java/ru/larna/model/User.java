@@ -1,21 +1,33 @@
 package ru.larna.model;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Value;
 import ru.larna.util.parsers.UserWrongFormatException;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * Класс описывающий пользователя
  */
-@RequiredArgsConstructor
-@Getter
+@Value
 @Builder
 public class User {
+    /**
+     * Имя пользователя
+     */
     private final String name;
-    @Setter
-    private List<Email> emails;
+    /**
+     * Список email пользователя
+     */
+    private final Set<Email> emails;
 
+    /**
+     * Метод преобразования объекта в строку
+     *
+     * @return возвращает строку в следующем формате: username -> email1, email2, ...., emailN
+     * В случае возникновения ошибок при преобразовании email'ов пользователя в строку выбрасывает UserWrongFormatException
+     * @see UserWrongFormatException
+     */
     @Override
     public String toString() {
         String emailsString = emails.stream()

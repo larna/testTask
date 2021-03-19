@@ -10,7 +10,7 @@ import ru.larna.util.parsers.UserParser;
 import ru.larna.util.parsers.UserParserImpl;
 import ru.larna.util.parsers.UserWrongFormatException;
 
-import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,6 +21,7 @@ class UserParserImplTest {
     UserParserImplTest() {
         this.parser = new UserParserImpl();
     }
+
     @DisplayName("Должен корректно парсить строку")
     @ParameterizedTest
     @ValueSource(strings = {"user1 -> user1@mail.ru, test@gmail.com",
@@ -36,11 +37,13 @@ class UserParserImplTest {
         final String string = "user1 -> user1@mail.ru, test@gmail.com";
         User expected = User.builder()
                 .name("user1")
-                .emails(List.of(new Email("user1@mail.ru"), new Email("test@gmail.com")))
+                .emails(Set.of(new Email("user1@mail.ru"), new Email("test@gmail.com")))
                 .build();
+
         User actual = parser.parse(string);
         assertEquals(expected, actual);
     }
+
     @DisplayName("Должен выбрасывать исключение если строка не валидная")
     @ParameterizedTest
     @ValueSource(strings = {" -> user1@mail.ru, test@gmail.com", "user1 -> ", "user user@gmail.com",

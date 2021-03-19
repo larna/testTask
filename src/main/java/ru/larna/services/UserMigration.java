@@ -13,7 +13,8 @@ import java.util.stream.Collectors;
 /**
  * Сервис слияния пользователей.
  * Если 2 разных пользователя имеют одинаковые email, то они учитываются как один пользователь с объединенным списком
- * email, для такого пользователя будет взято имя первого пользователя, второе имя будет отброшено.
+ * email, для такого пользователя будет взято имя последнего пользователя для которого обнаружатся общие email,
+ * остальные имена будут отброшены. В процессе слияния порядок следования пользователей не гарантируется.
  */
 @Slf4j
 public class UserMigration {
@@ -28,17 +29,17 @@ public class UserMigration {
     /**
      * Map для хранения уже встреченных email.
      */
-    private final Set<Email> emailsSet;
+    private final HashMap<Email, User> emailsMap;
     /**
-     * Список актуальных пользователей
+     * Map актуальных пользователей
      */
-    private final Set<User> userSet;
+    private final HashMap<String, User> userMap;
 
     public UserMigration(IOService ioService, UserParser userParser) {
         this.ioService = ioService;
         this.userParser = userParser;
-        this.emailsSet = new HashSet<>();
-        this.userSet = new HashSet<>();
+        this.emailsMap = new HashMap<>();
+        this.userMap = new HashMap<>();
     }
 
     /**
@@ -47,7 +48,7 @@ public class UserMigration {
      * @return возвращает кол-во обнаруженных уникальных пользователей
      */
     public Integer getActualUsersCount() {
-        return userSet.size();
+        return userMap.size();
     }
 
     /**
@@ -71,7 +72,7 @@ public class UserMigration {
      */
     private void merge() throws IOException {
         String str;
-        boolean isExit = false;
+        boolean isExit;
         do {
             str = ioService.read();
             isExit = isStopHandle(str);
@@ -93,7 +94,7 @@ public class UserMigration {
      * @throws IOException в случае IO ошибки выбрасывает исключение
      */
     private void saveResult() throws IOException {
-        userSet.stream().forEach(user -> ioService.write(user.toString()));
+        userMap.values().forEach(user -> ioService.write(user.toString()));
     }
 
     /**
@@ -102,40 +103,39 @@ public class UserMigration {
      * @param user - пользователь
      */
     private void addNewUser(User user) {
-        user.getEmails().forEach(emailsSet::add);
-        userSet.add(user);
+        user.getEmails().forEach(email -> emailsMap.put(email, user));
+        userMap.put(user.getName(), user);
     }
 
     /**
-     * Найти пользователя по любому из списка email
+     * Найти список email которые совпадают с уже учтенными
      *
-     * @param emails список email
-     * @return возвращает пользователя если хотя бы один их списка email уже зарегистрирован, null если ни одного email
-     * еще не было зарегистрировано
+     * @param emails set of emails
+     * @return возвращает список объектов Email из переданного аргумента emails, для которых есть совпадения
+     * с уже учтенными email
      */
-    private List<Email> getAllCrossingEmails(List<Email> emails) {
+    private List<Email> getAllCrossingEmails(Set<Email> emails) {
         return emails.stream()
-                .filter(emailsSet::contains)
+                .filter(emailsMap::containsKey)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Слить пользователей и их email. Email в списке пользователя не дублируются.
-     * В случае обнаружения пользователя, который в своем списке email совместил email пользователей из existsUsersList,
-     * производиться слияние этих пользователей в одного.
+     * Слияние пользователей для которых найдены пересечения в email. Email в списке пользователя не дублируются.
      * В качестве актуального пользователя берется последний найденный
      *
-     * @param existsEmailList список уже существующих email
-     * @param user            пользователь который в своем списке email совместил email пользователей из existsUsersList
+     * @param user        пользователь, который останется после слияния, все остальные пользователи будут отброшены,
+     *                    а их email будут добавлены в данного пользователя
+     * @param crossEmails список email, для которых найдены пересечения с уже имеющимися
      */
-    private void mergeUsers(User user, List<Email> existsEmailList) {
-        existsEmailList.forEach(existEmail -> {
-            User existUser = existEmail.getUser();
-            userSet.remove(user);
-            existUser.getEmails().forEach(email -> email.setUser(user));
+    private void mergeUsers(User user, List<Email> crossEmails) {
+        crossEmails.forEach(email -> {
+            User existUser = emailsMap.get(email);
+            userMap.remove(existUser.getName());
+            user.getEmails().addAll(existUser.getEmails());
+            existUser.getEmails().forEach(existsEmail -> emailsMap.put(existsEmail, user));
         });
-        user.getEmails().stream().forEach(emailsSet::add);
-        userSet.add(user);
+        addNewUser(user);
     }
 
     /**

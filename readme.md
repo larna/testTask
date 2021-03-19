@@ -55,5 +55,5 @@ java -jar target/test-1.0-SNAPSHOT-jar-with-dependencies.jar --fake-data
 ```sh
 java -jar target/test-1.0-SNAPSHOT-jar-with-dependencies.jar < yourData.txt
 ```
-Выходные данные сохраняются в файлы с названиями: out.txt
+Выходные данные выводятся в stdout
 

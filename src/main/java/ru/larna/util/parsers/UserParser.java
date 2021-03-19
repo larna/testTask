@@ -1,6 +1,7 @@
 package ru.larna.util.parsers;
 
 import ru.larna.model.User;
+
 /**
  * Интерфейс UserParser.
  * Разбирает полученную строку в объект User.

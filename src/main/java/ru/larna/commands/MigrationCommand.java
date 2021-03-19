@@ -13,6 +13,10 @@ import ru.larna.util.parsers.UserParserImpl;
  */
 @Slf4j
 public class MigrationCommand {
+    public static MigrationCommand getInstance() {
+        return new MigrationCommand();
+    }
+
     /**
      * Запустить процесс слияния пользователей
      */
