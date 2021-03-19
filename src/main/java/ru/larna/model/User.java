@@ -8,11 +8,13 @@ import java.util.List;
 /**
  * Класс описывающий пользователя
  */
-@Value
+@RequiredArgsConstructor
+@Getter
 @Builder
 public class User {
     private final String name;
-    private final List<Email> emails;
+    @Setter
+    private List<Email> emails;
 
     @Override
     public String toString() {

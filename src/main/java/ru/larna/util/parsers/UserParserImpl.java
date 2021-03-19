@@ -54,11 +54,8 @@ public class UserParserImpl implements UserParser {
 
         final String userName = matcher.group(1);
         final String emailsString = matcher.group(2);
-        User user = User.builder()
-                .name(userName)
-                .emails(parseEmails(emailsString))
-                .build();
-
+        User user = new User(userName);
+        user.setEmails(parseEmails(emailsString, user));
         return user;
     }
 
@@ -68,13 +65,13 @@ public class UserParserImpl implements UserParser {
      * @param emails - строка содержащая email
      * @return список объектов Email
      */
-    private List<Email> parseEmails(String emails) {
+    private List<Email> parseEmails(String emails, User user) {
         String[] emailArray = emails.split("\\s*,\\s*");
         if (!isAllEmailsValid(emailArray))
             throw new UserWrongFormatException("Wrong emails - " + emails);
 
         return Arrays.stream(emailArray)
-                .map(email -> new Email(email))
+                .map(email -> new Email(email, user))
                 .collect(Collectors.toList());
     }
 
