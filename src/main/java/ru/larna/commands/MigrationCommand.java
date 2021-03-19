@@ -23,7 +23,7 @@ public class MigrationCommand {
     /**
      * Запустить процесс слияния пользователей
      */
-    public static void execute() {
+    public void execute() {
         final UserParser parser = new UserParserImpl();
         log.info("**************************************");
         log.info("Data from stdin...");

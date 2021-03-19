@@ -30,7 +30,7 @@ public class FakeDataCommand {
      * При генерации данные сбрасываются в соответствующий файл fakeData-N%d.txt
      * Метод проверки производит чтение из соответствующего файла и сбрасывает свой результат в файл out-N...txt
      */
-    public static void execute() {
+    public void execute() {
         final UserParser parser = new UserParserImpl();
         IntStream.rangeClosed(1, 6).map(i -> (int) Math.pow(10, i))
                 .forEach(usersCount -> {
@@ -43,10 +43,10 @@ public class FakeDataCommand {
      * Запуск генерации фейковых данных.
      * @param usersCount ожидаемое кол-во пользователей
      */
-    private static void generate(Integer usersCount) {
+    private void generate(Integer usersCount) {
         String filename = String.format(FILENAME_TEMPLATE, usersCount);
         try (OutputStream out = Files.newOutputStream(Path.of(filename));
-             IOService ioService = new IOServiceImpl(System.in, new PrintStream(out));) {
+             IOService ioService = new IOServiceImpl(System.in, new PrintStream(out))) {
             FakeUsersDataGenerator generator = new FakeUsersDataGenerator(usersCount, ioService);
             generator.generate();
         } catch (IOException e) {
@@ -58,9 +58,9 @@ public class FakeDataCommand {
      * Проверка на массивах fake данных
      *
      * @param userCount - кол-во пользователей
-     * @param parser
+     * @param parser - парсер строки в объект пользователя
      */
-    private static void checkOnFakeData(Integer userCount, UserParser parser) {
+    private void checkOnFakeData(Integer userCount, UserParser parser) {
         try {
             String inFilename = String.format(FILENAME_TEMPLATE, userCount);
             String outFilename = String.format(FILE_OUTPUT_TEMPLATE, userCount);

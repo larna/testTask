@@ -10,16 +10,14 @@ public class Main {
 
     public static void main(String[] args) {
         if (isFakeDataArg(args)) {
-            FakeDataCommand.execute();
+            new FakeDataCommand().execute();
             return;
         }
-        MigrationCommand.execute();
+        new MigrationCommand().execute();
     }
 
     private static Boolean isFakeDataArg(String... args) {
-        if (args != null && Arrays.stream(args).anyMatch(FAKE_DATA_COMMAND::equals))
-            return true;
-        return false;
+        return args != null && Arrays.asList(args).contains(FAKE_DATA_COMMAND);
     }
 
 }

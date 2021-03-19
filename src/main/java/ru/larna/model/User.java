@@ -14,9 +14,10 @@ public class User {
     private final String name;
     private final List<Email> emails;
 
-    public String format() {
+    @Override
+    public String toString() {
         String emailsString = emails.stream()
-                .map(email -> email.getEmail())
+                .map(Email::getEmail)
                 .reduce((s1, s2) -> s1 + ", " + s2)
                 .orElseThrow(UserWrongFormatException::new);
         return name + " -> " + emailsString;

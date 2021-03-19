@@ -46,7 +46,7 @@ public class UserMigration {
     /**
      * Получить кол-во актуальных пользователей
      *
-     * @return
+     * @return возвращает кол-во обнаруженных уникальных пользователей
      */
     public Integer getActualUsersCount() {
         return userList.size();
@@ -69,11 +69,11 @@ public class UserMigration {
     /**
      * Произвести слияние данных о пользователях
      *
-     * @throws IOException
+     * @throws IOException в случае IO ошибки выбрасывает исключение
      */
     private void merge() throws IOException {
         String str;
-        Boolean isExit = false;
+        boolean isExit = false;
         do {
             str = ioService.read();
             isExit = isStopHandle(str);
@@ -92,13 +92,10 @@ public class UserMigration {
     /**
      * Сохранить/Вывести результат
      *
-     * @throws IOException
+     * @throws IOException в случае IO ошибки выбрасывает исключение
      */
     private void saveResult() throws IOException {
-        userList.stream()
-                .forEach(user -> {
-                    ioService.write(user.format());
-                });
+        userList.forEach(user -> ioService.write(user.toString()));
     }
 
     /**
@@ -107,8 +104,7 @@ public class UserMigration {
      * @param user - пользователь
      */
     private void addNewUser(User user) {
-        user.getEmails().stream()
-                .forEach(email -> emailsMap.putIfAbsent(email, user));
+        user.getEmails().forEach(email -> emailsMap.putIfAbsent(email, user));
         userList.add(user);
     }
 
@@ -121,7 +117,7 @@ public class UserMigration {
      */
     private User getUserByEmails(List<Email> emails) {
         Email foundEmail = emails.stream()
-                .filter(email -> emailsMap.containsKey(email))
+                .filter(emailsMap::containsKey)
                 .findFirst()
                 .orElse(null);
         return foundEmail == null ? null : emailsMap.get(foundEmail);
@@ -129,11 +125,12 @@ public class UserMigration {
 
     /**
      * Добавить список новых email к пользователю. Email в списке пользователя не дублируются.
-     * @param user пользователь
+     *
+     * @param user   пользователь
      * @param emails список email
      */
     private void addNewEmailsToUser(User user, List<Email> emails) {
-        emails.stream().forEach(email -> {
+        emails.forEach(email -> {
             if (emailsMap.putIfAbsent(email, user) == null)
                 user.getEmails().add(email);
         });
@@ -141,13 +138,11 @@ public class UserMigration {
 
     /**
      * Проверка: Следует ли прекратить обработку?
+     *
      * @param str проверяемая строка
      * @return возвращает true - получена пустая строка, false - получили не пустую строку
      */
     private Boolean isStopHandle(String str) {
-        if (str == null || str.isEmpty()) {
-            return true;
-        }
-        return false;
+        return str == null || str.isEmpty();
     }
 }
