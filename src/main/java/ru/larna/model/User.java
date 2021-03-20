@@ -17,7 +17,7 @@ public class User {
      */
     private final String name;
     /**
-     * Список email пользователя
+     * Set email'ов пользователя
      */
     private final Set<Email> emails;
 

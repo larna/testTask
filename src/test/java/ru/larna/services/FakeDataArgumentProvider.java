@@ -84,7 +84,7 @@ public class FakeDataArgumentProvider implements ArgumentsProvider {
     }
 
     @Value
-    public class FakeDataArgument {
+    public static class FakeDataArgument {
         private final List<String> fakeData;
         private final Set<User> expected;
     }
