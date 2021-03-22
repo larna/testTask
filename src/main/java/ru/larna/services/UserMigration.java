@@ -83,7 +83,7 @@ public class UserMigration {
                 if (existsEmailsList == null || existsEmailsList.isEmpty())
                     addNewUser(checkedUser);
                 else
-                    mergeUsers(checkedUser, existsEmailsList);
+                    mergeUserWithExistsEmails(checkedUser, existsEmailsList);
             }
         } while (!isExit);
     }
@@ -128,7 +128,7 @@ public class UserMigration {
      *                    а их email будут добавлены в данного пользователя
      * @param crossEmails список email, для которых найдены пересечения с уже имеющимися
      */
-    private void mergeUsers(User user, List<Email> crossEmails) {
+    private void mergeUserWithExistsEmails(User user, List<Email> crossEmails) {
         crossEmails.forEach(email -> {
             User existUser = emailsMap.get(email);
             userMap.remove(existUser.getName());
