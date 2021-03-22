@@ -16,6 +16,7 @@ import ru.larna.util.parsers.UserParser;
 import ru.larna.util.parsers.UserParserImpl;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -52,17 +53,10 @@ class UserMigrationTest {
         ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
         verify(ioService, times(expectedUsersCount)).write(argumentCaptor.capture());
         List<String> capturedArguments = argumentCaptor.getAllValues();
-        Set<User> actualUsers = getUsersFromOutput(capturedArguments);
+        List<String> actualUsers = new ArrayList<>(capturedArguments);
 
         Assertions.assertAll(() -> assertEquals(expectedUsersCount, userMigration.getActualUsersCount()),
                 () -> assertEquals(arg.getExpected(), actualUsers));
-    }
-
-    private Set<User> getUsersFromOutput(List<String> capturedArguments) {
-        UserParser parser = new UserParserImpl();
-        return capturedArguments.stream()
-                .map(parser::parse)
-                .collect(Collectors.toSet());
     }
 
     private static class FakeDataPortion implements Answer<String> {
@@ -75,7 +69,7 @@ class UserMigrationTest {
         }
 
         @Override
-        public String answer(InvocationOnMock invocationOnMock){
+        public String answer(InvocationOnMock invocationOnMock) {
             if (currentReadIndex < fakeData.size())
                 return fakeData.get(currentReadIndex++);
             return "";

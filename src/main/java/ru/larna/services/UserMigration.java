@@ -2,19 +2,19 @@ package ru.larna.services;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.larna.model.Email;
-import ru.larna.model.User;
 import ru.larna.util.parsers.UserParser;
 import ru.larna.util.parsers.UserWrongFormatException;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Сервис слияния пользователей.
  * Если 2 разных пользователя имеют одинаковые email, то они учитываются как один пользователь с объединенным списком
- * email, для такого пользователя будет взято имя последнего пользователя для которого обнаружатся общие email,
- * остальные имена будут отброшены. В процессе слияния порядок следования пользователей не гарантируется.
+ * email, для такого пользователя будет взято имя первого пользователя для которого обнаружатся общие email,
+ * остальные имена будут отброшены. Порядок следования пользователей сохраняется.
  */
 @Slf4j
 public class UserMigration {
@@ -29,17 +29,17 @@ public class UserMigration {
     /**
      * Map для хранения уже встреченных email.
      */
-    private final HashMap<Email, User> emailsMap;
+    private final HashMap<Email, OrderedUser> emailsMap;
     /**
-     * Map актуальных пользователей
+     * Set актуальных пользователей.
      */
-    private final HashMap<String, User> userMap;
+    private final LinkedHashSet<OrderedUser> userSet;
 
     public UserMigration(IOService ioService, UserParser userParser) {
         this.ioService = ioService;
         this.userParser = userParser;
         this.emailsMap = new HashMap<>();
-        this.userMap = new HashMap<>();
+        this.userSet = new LinkedHashSet<>();
     }
 
     /**
@@ -48,7 +48,7 @@ public class UserMigration {
      * @return возвращает кол-во обнаруженных уникальных пользователей
      */
     public Integer getActualUsersCount() {
-        return userMap.size();
+        return userSet.size();
     }
 
     /**
@@ -71,6 +71,7 @@ public class UserMigration {
      * @throws IOException в случае IO ошибки выбрасывает исключение
      */
     private void merge() throws IOException {
+        long counter = 0;
         String str;
         boolean isExit;
         do {
@@ -78,8 +79,8 @@ public class UserMigration {
             isExit = isStopHandle(str);
 
             if (!isExit) {
-                User checkedUser = userParser.parse(str);
-                List<Email> existsEmailsList = this.getAllCrossingEmails(checkedUser.getEmails());
+                OrderedUser checkedUser = new OrderedUser(userParser.parse(str), ++counter);
+                List<Email> existsEmailsList = this.getAllCrossingEmails(checkedUser.getUser().getEmails());
                 if (existsEmailsList == null || existsEmailsList.isEmpty())
                     addNewUser(checkedUser);
                 else
@@ -94,7 +95,7 @@ public class UserMigration {
      * @throws IOException в случае IO ошибки выбрасывает исключение
      */
     private void saveResult() throws IOException {
-        userMap.values().forEach(user -> ioService.write(user.toString()));
+        userSet.forEach(user -> ioService.write(user.getUser().toString()));
     }
 
     /**
@@ -102,9 +103,9 @@ public class UserMigration {
      *
      * @param user - пользователь
      */
-    private void addNewUser(User user) {
-        user.getEmails().forEach(email -> emailsMap.put(email, user));
-        userMap.put(user.getName(), user);
+    private void addNewUser(OrderedUser user) {
+        user.getUser().getEmails().forEach(email -> emailsMap.put(email, user));
+        userSet.add(user);
     }
 
     /**
@@ -128,14 +129,32 @@ public class UserMigration {
      *                    а их email будут добавлены в данного пользователя
      * @param crossEmails список email, для которых найдены пересечения с уже имеющимися
      */
-    private void mergeUserWithExistsEmails(User user, List<Email> crossEmails) {
-        crossEmails.forEach(email -> {
-            User existUser = emailsMap.get(email);
-            userMap.remove(existUser.getName());
-            user.getEmails().addAll(existUser.getEmails());
-            existUser.getEmails().forEach(existsEmail -> emailsMap.put(existsEmail, user));
-        });
-        addNewUser(user);
+    private void mergeUserWithExistsEmails(OrderedUser user, List<Email> crossEmails) {
+        List<OrderedUser> usersList = crossEmails.stream()
+                .map(emailsMap::get)
+                .distinct()
+                .sorted(Comparator.comparing(OrderedUser::getOrderNum))
+                .collect(Collectors.toList());
+
+        OrderedUser mergedUser = usersList.get(0);
+        IntStream.range(1, usersList.size())
+                .forEach(i -> {
+                    OrderedUser existUser = usersList.get(i);
+                    userSet.remove(existUser);
+                    assignEmailsToUser(existUser.getUser().getEmails(), mergedUser);
+                });
+        assignEmailsToUser(user.getUser().getEmails(), mergedUser);
+    }
+
+    /**
+     * Регистрация пользователя для email'ов
+     *
+     * @param emails set of emails
+     * @param user   пользователь в список которого эти email входят
+     */
+    private void assignEmailsToUser(Set<Email> emails, OrderedUser user) {
+        emails.forEach(email -> emailsMap.put(email, user));
+        user.getUser().getEmails().addAll(emails);
     }
 
     /**

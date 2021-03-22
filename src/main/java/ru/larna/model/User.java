@@ -20,7 +20,6 @@ public class User {
      * Set email'ов пользователя
      */
     private final Set<Email> emails;
-
     /**
      * Метод преобразования объекта в строку
      *

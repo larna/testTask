@@ -6,6 +6,7 @@ import ru.larna.util.validators.EmailValidator;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -74,7 +75,7 @@ public class UserParserImpl implements UserParser {
 
         return Arrays.stream(emailArray)
                 .map(Email::new)
-                .collect(Collectors.toCollection(HashSet::new));
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     /**
