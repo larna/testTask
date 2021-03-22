@@ -147,10 +147,10 @@ public class UserMigration {
     }
 
     /**
-     * Регистрация пользователя для email'ов
+     * Назначить пользователю email'ы
      *
      * @param emails set of emails
-     * @param user   пользователь в список которого эти email входят
+     * @param user   пользователь в список которого email нужно добавить
      */
     private void assignEmailsToUser(Set<Email> emails, OrderedUser user) {
         emails.forEach(email -> emailsMap.put(email, user));
