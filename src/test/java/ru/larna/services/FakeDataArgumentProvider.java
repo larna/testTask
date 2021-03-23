@@ -4,18 +4,15 @@ import lombok.Value;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
-import ru.larna.model.User;
-import ru.larna.util.parsers.UserParser;
-import ru.larna.util.parsers.UserParserImpl;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Stream;
 
 public class FakeDataArgumentProvider implements ArgumentsProvider {
     @Override
     public Stream<? extends Arguments> provideArguments(ExtensionContext extensionContext) {
         return Stream.of(
+                Arguments.of(fakeDataAnotherThreeUserResult()),
                 Arguments.of(fakeDataOneUserResult()),
                 Arguments.of(fakeDataTwoUserResult()),
                 Arguments.of(fakeDataThreeUserResult()),
@@ -24,12 +21,20 @@ public class FakeDataArgumentProvider implements ArgumentsProvider {
                 Arguments.of(fakeDataAnotherTwoTestUsersResult())
         );
     }
-
+    private FakeDataArgument fakeDataAnotherThreeUserResult() {
+        List<String> fakeData = List.of("user2 -> user3@mail.ru, user4@mail.ru",
+                "user3 -> user5@mail.ru, user6@mail.ru",
+                "user1 -> user1@mail.ru, user2@mail.ru",
+                "user4 -> user6@mail.ru, user3@mail.ru");
+        String expected1 = "user2 -> user3@mail.ru, user4@mail.ru, user5@mail.ru, user6@mail.ru";
+        String expected2 = "user1 -> user1@mail.ru, user2@mail.ru";
+        return new FakeDataArgument(fakeData, List.of(expected1, expected2));
+    }
     private FakeDataArgument fakeDataOneUserResult() {
         List<String> fakeData = List.of("user1 -> user1@mail.ru, user3@mail.ru, user2@mail.ru",
                 "user2 -> user4@mail.ru, user5@mail.ru, user3@mail.ru",
                 "user3 -> user6@mail.ru, user7@mail.ru, user1@mail.ru",
-                "user3 -> user8@mail.ru, user9@mail.ru, user4@mail.ru");
+                "user4 -> user8@mail.ru, user9@mail.ru, user4@mail.ru");
         String expected = "user1 -> user1@mail.ru, user3@mail.ru, user2@mail.ru, user4@mail.ru, " +
                 "user5@mail.ru, user6@mail.ru, user7@mail.ru, user8@mail.ru, user9@mail.ru";
         return new FakeDataArgument(fakeData, List.of(expected));
