@@ -5,6 +5,7 @@ import lombok.Value;
 import ru.larna.util.parsers.UserWrongFormatException;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Класс описывающий пользователя
@@ -31,8 +32,7 @@ public class User {
     public String toString() {
         String emailsString = emails.stream()
                 .map(Email::getEmail)
-                .reduce((s1, s2) -> s1 + ", " + s2)
-                .orElseThrow(UserWrongFormatException::new);
+                .collect(Collectors.joining(", "));
         return name + " -> " + emailsString;
     }
 }

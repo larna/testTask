@@ -5,7 +5,6 @@ import ru.larna.model.User;
 import ru.larna.util.validators.EmailValidator;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.regex.Matcher;

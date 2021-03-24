@@ -97,10 +97,11 @@ public class UserMigration {
     private void saveResult() throws IOException {
         userMap.values().forEach(user -> ioService.write(user.toString()));
     }
+
     /**
      * Регистрация нового пользователя
      *
-     * @param user - пользователь
+     * @param user   - пользователь
      * @param userId - назначенный пользователю на время обработки идентификатор.
      */
     private void addNewUser(User user, Long userId) {
@@ -133,14 +134,14 @@ public class UserMigration {
     private void mergeUserWithExistsEmails(User user, List<Email> crossEmails) {
         TreeSet<Long> usersIdList = crossEmails.stream().map(emailsMap::get).collect(Collectors.toCollection(TreeSet::new));
 
-        Iterator<Long> it = usersIdList.iterator();
-        final Long mergedUserId = it.next();
-        while (it.hasNext()) {
-            Long userId = it.next();
-            User existUser = userMap.get(userId);
-            userMap.remove(userId);
-            assignEmailsToUser(existUser.getEmails(), mergedUserId);
-        }
+        final Long mergedUserId = usersIdList.first();
+        usersIdList.stream()
+                .skip(1)
+                .forEach(userId -> {
+                    User existUser = userMap.get(userId);
+                    userMap.remove(userId);
+                    assignEmailsToUser(existUser.getEmails(), mergedUserId);
+                });
         assignEmailsToUser(user.getEmails(), mergedUserId);
     }
 
